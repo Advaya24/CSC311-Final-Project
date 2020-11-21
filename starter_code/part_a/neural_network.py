@@ -70,7 +70,8 @@ class AutoEncoder(nn.Module):
         # Implement the function as described in the docstring.             #
         # Use sigmoid activations for f and g.                              #
         #####################################################################
-        out = inputs
+        out_1 = F.sigmoid(self.g(inputs))
+        out = F.sigmoid(self.h(out_1))
         #####################################################################
         #                       END OF YOUR CODE                            #
         #####################################################################
@@ -90,8 +91,8 @@ def train(model, lr, lamb, train_data, zero_train_data, valid_data, num_epoch):
     :param num_epoch: int
     :return: None
     """
-    # TODO: Add a regularizer to the cost function. 
-    
+    # TODO: Add a regularizer to the cost function.
+
     # Tell PyTorch you are training the model.
     model.train()
 
@@ -162,16 +163,17 @@ def main():
     # validation set.                                                   #
     #####################################################################
     # Set model hyperparameters.
-    k = None
-    model = None
+    k_lst = [10, 50, 100, 200, 500]
+    for k in k_lst:
+        model = AutoEncoder(train_matrix.shape[1], k)
 
-    # Set optimization hyperparameters.
-    lr = None
-    num_epoch = None
-    lamb = None
+        # Set optimization hyperparameters.
+        lr = 0.01
+        num_epoch = 1000
+        lamb = None
 
-    train(model, lr, lamb, train_matrix, zero_train_matrix,
-          valid_data, num_epoch)
+        train(model, lr, lamb, train_matrix, zero_train_matrix,
+              valid_data, num_epoch)
     #####################################################################
     #                       END OF YOUR CODE                            #
     #####################################################################
