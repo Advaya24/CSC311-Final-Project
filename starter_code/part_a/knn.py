@@ -19,7 +19,7 @@ def knn_impute_by_user(matrix, valid_data, k):
     # We use NaN-Euclidean distance measure.
     mat = nbrs.fit_transform(matrix)
     acc = sparse_matrix_evaluate(valid_data, mat)
-    print("Validation Accuracy: {}".format(acc))
+    print("User Based Validation Accuracy: {}".format(acc))
     return acc
 
 
@@ -37,7 +37,10 @@ def knn_impute_by_item(matrix, valid_data, k):
     # TODO:                                                             #
     # Implement the function as described in the docstring.             #
     #####################################################################
-    acc = None
+    nbrs = KNNImputer(n_neighbors=k)
+    mat = nbrs.fit_transform(matrix.T).T
+    acc = sparse_matrix_evaluate(valid_data, mat)
+    print("Item Based Validation Accuracy: {}".format(acc))
     #####################################################################
     #                       END OF YOUR CODE                            #
     #####################################################################
@@ -60,7 +63,25 @@ def main():
     # the best performance and report the test accuracy with the        #
     # chosen k*.                                                        #
     #####################################################################
-    pass
+    k_list = [1, 6, 11, 16, 21, 26]
+    user_accuracies = []
+    item_accuracies = []
+    for k in k_list:
+        print(f"k = {k}: ")
+        user_accuracies.append(knn_impute_by_user(sparse_matrix, val_data, k))
+        item_accuracies.append(knn_impute_by_item(sparse_matrix, val_data, k))
+    k_user = int(np.argmax(user_accuracies))
+    k_item = int(np.argmax(item_accuracies))
+    test_acc_user = knn_impute_by_user(sparse_matrix, test_data, k_list[k_user])
+    test_acc_item = knn_impute_by_item(sparse_matrix, test_data, k_list[k_item])
+    print("User based")
+    print("_______________")
+    print(f"k selected: {k_list[k_user]}")
+    print(f"test acc: {test_acc_user}\n")
+    print("Item based")
+    print("_______________")
+    print(f"k selected: {k_list[k_item]}")
+    print(f"test acc: {test_acc_item}\n")
     #####################################################################
     #                       END OF YOUR CODE                            #
     #####################################################################
