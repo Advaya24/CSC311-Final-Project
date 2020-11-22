@@ -24,7 +24,17 @@ def neg_log_likelihood(data, theta, beta):
     # TODO:                                                             #
     # Implement the function as described in the docstring.             #
     #####################################################################
-    log_lklihood = 0.
+    N, M = theta.shape[0], beta.shape[0]
+    data = np.nan_to_num(data.toarray(), nan=0)
+    # term_1 = theta @ np.sum(data, axis=1)
+    # term_2 = beta @ np.sum(data, axis=0)
+    # term_3 = 0
+    # for i in range(N):
+    #     for j in range(M):
+    #         term_3 += np.logaddexp(0, theta[i] - beta[j]) * data[i][j]
+    # log_lklihood = term_1 + term_2 - term_3
+    log_lklihood = np.sum(np.log(
+        sigmoid(np.tile(theta, (M, 1)) - np.tile(beta, (N, 1)).T)) * data.T)
     #####################################################################
     #                       END OF YOUR CODE                            #
     #####################################################################
@@ -52,7 +62,34 @@ def update_theta_beta(data, lr, theta, beta):
     # TODO:                                                             #
     # Implement the function as described in the docstring.             #
     #####################################################################
-    pass
+    # theta_cap = np.zeros_like(theta)
+    # beta_cap = np.zeros_like(beta)
+    data = np.nan_to_num(data.toarray(), nan=0)
+    N = theta.shape[0]
+    M = beta.shape[0]
+    # print(f'beta_cap: {beta_cap.shape}')
+    beta_mat = np.vstack([beta] * N)
+    # print(f'beta_mat: {beta_mat.shape}')
+    theta_vec = 1 / (1 + np.exp(theta.reshape(-1, 1) - beta_mat))
+    # print(f'theta_vec: {theta_vec.shape}')
+    theta_vec = theta_vec * data
+    theta_cap = -np.sum(theta_vec, axis=1)
+    # print(f'theta_cap: {theta_cap.shape}')
+    # for i in range(N):
+    #     denom = 1 + np.exp(theta[i] - beta)
+    #     theta_cap[i] = np.sum(1 / denom)
+    theta -= (lr * theta_cap)  # TODO: Change to -
+
+    theta_mat = np.vstack([theta] * M)
+    # print(f'data: {data.shape}')
+    # print(f'theta: {theta.shape}')
+    # print(f'beta: {beta.shape}')
+    # print(f'theta_mat: {theta_mat.shape}')
+    beta_vec = 1 / (1 + np.exp(theta_mat - beta.reshape(-1, 1)))
+    # print(f'beta_vec: {beta_vec.shape}')
+    beta_vec = beta_vec.T * data
+    beta_cap = np.sum(beta_vec, axis=0)
+    beta -= (lr * beta_cap)
     #####################################################################
     #                       END OF YOUR CODE                            #
     #####################################################################
@@ -73,8 +110,8 @@ def irt(data, val_data, lr, iterations):
     :return: (theta, beta, val_acc_lst)
     """
     # TODO: Initialize theta and beta.
-    theta = None
-    beta = None
+    theta = np.random.randn(data.shape[0])
+    beta = np.random.randn(data.shape[1])
 
     val_acc_lst = []
 
@@ -120,7 +157,8 @@ def main():
     # Tune learning rate and number of iterations. With the implemented #
     # code, report the validation and test accuracy.                    #
     #####################################################################
-    pass
+    lr = 0.03
+    iterations = 100
     #####################################################################
     #                       END OF YOUR CODE                            #
     #####################################################################
@@ -129,7 +167,9 @@ def main():
     # TODO:                                                             #
     # Implement part (c)                                                #
     #####################################################################
-    pass
+    theta, beta, val_acc_list = irt(sparse_matrix, val_data, lr, iterations)
+    score = evaluate(test_data, theta=theta, beta=beta)
+    print(f'Test Score: {score}')
     #####################################################################
     #                       END OF YOUR CODE                            #
     #####################################################################

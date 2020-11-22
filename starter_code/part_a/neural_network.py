@@ -70,8 +70,8 @@ class AutoEncoder(nn.Module):
         # Implement the function as described in the docstring.             #
         # Use sigmoid activations for f and g.                              #
         #####################################################################
-        out_1 = F.sigmoid(self.g(inputs))
-        out = F.sigmoid(self.h(out_1))
+        out_1 = torch.sigmoid(self.g(inputs))
+        out = torch.sigmoid(self.h(out_1))
         #####################################################################
         #                       END OF YOUR CODE                            #
         #####################################################################
@@ -114,7 +114,8 @@ def train(model, lr, lamb, train_data, zero_train_data, valid_data, num_epoch):
             nan_mask = np.isnan(train_data[user_id].unsqueeze(0).numpy())
             target[0][nan_mask] = output[0][nan_mask]
 
-            loss = torch.sum((output - target) ** 2.)
+            loss = torch.sum((output - target) ** 2.) + (
+                        (lamb / 2) * model.get_weight_norm())
             loss.backward()
 
             train_loss += loss.item()
@@ -164,16 +165,17 @@ def main():
     #####################################################################
     # Set model hyperparameters.
     k_lst = [10, 50, 100, 200, 500]
-    for k in k_lst:
-        model = AutoEncoder(train_matrix.shape[1], k)
+    # for k in k_lst:
+    k = k_lst[2]
+    model = AutoEncoder(train_matrix.shape[1], k)
 
-        # Set optimization hyperparameters.
-        lr = 0.01
-        num_epoch = 1000
-        lamb = None
+    # Set optimization hyperparameters.
+    lr = 0.1
+    num_epoch = 1000
+    lamb = 0.1
 
-        train(model, lr, lamb, train_matrix, zero_train_matrix,
-              valid_data, num_epoch)
+    train(model, lr, lamb, train_matrix, zero_train_matrix,
+          valid_data, num_epoch)
     #####################################################################
     #                       END OF YOUR CODE                            #
     #####################################################################
