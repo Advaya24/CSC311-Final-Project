@@ -9,6 +9,8 @@ import torch.utils.data
 import numpy as np
 import torch
 
+from starter_code.utils import load_train_sparse, load_valid_csv, load_public_test_csv
+
 
 def load_data(base_path="../data"):
     """ Load the data in PyTorch Tensor.
