@@ -8,8 +8,13 @@ import torch.utils.data
 
 import numpy as np
 import torch
+# import argparse
 
-from starter_code.utils import load_train_sparse, load_valid_csv, load_public_test_csv
+from starter_code.utils import load_train_sparse, load_valid_csv, \
+    load_public_test_csv
+
+
+device = torch.device('cpu')
 
 
 def load_data(base_path="../data"):
@@ -94,7 +99,7 @@ def train(model, lr, lamb, train_data, zero_train_data, valid_data, num_epoch):
     :return: None
     """
     # TODO: Add a regularizer to the cost function.
-
+    global device
     # Tell PyTorch you are training the model.
     model.train()
 
@@ -106,8 +111,8 @@ def train(model, lr, lamb, train_data, zero_train_data, valid_data, num_epoch):
         train_loss = 0.
 
         for user_id in range(num_student):
-            inputs = Variable(zero_train_data[user_id]).unsqueeze(0)
-            target = inputs.clone()
+            inputs = Variable(zero_train_data[user_id]).unsqueeze(0).to(device)
+            target = inputs.clone().to(device)
 
             optimizer.zero_grad()
             output = model(inputs)
@@ -117,7 +122,7 @@ def train(model, lr, lamb, train_data, zero_train_data, valid_data, num_epoch):
             target[0][nan_mask] = output[0][nan_mask]
 
             loss = torch.sum((output - target) ** 2.) + (
-                        (lamb / 2) * model.get_weight_norm())
+                    (lamb / 2) * model.get_weight_norm())
             loss.backward()
 
             train_loss += loss.item()
@@ -158,7 +163,10 @@ def evaluate(model, train_data, valid_data):
 
 
 def main():
+    global device
     zero_train_matrix, train_matrix, valid_data, test_data = load_data()
+    if torch.cuda.is_available():
+        device = torch.device('cuda')
 
     #####################################################################
     # TODO:                                                             #
@@ -168,16 +176,59 @@ def main():
     # Set model hyperparameters.
     k_lst = [10, 50, 100, 200, 500]
     # for k in k_lst:
-    k = k_lst[2]
-    model = AutoEncoder(train_matrix.shape[1], k)
-
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument("--k", required=False,
+    #                     help="Index for k in [10, 50, 100, 200, 500]")
+    # parser.add_argument("--lr", required=False, help="Learning rate")
+    # parser.add_argument("--num-epoch", required=False, help="Num of epochs")
+    # parser.add_argument("--lamb", required=False, help="Lambda regularization")
+    # args = vars(parser.parse_args())
+    # if args['k']:
+    #     k = k_lst[int(args['k'])]
     # Set optimization hyperparameters.
-    lr = 0.1
-    num_epoch = 1000
-    lamb = 0.1
+    configs = [
+        {
+            'k': k_lst[0],
+            'lr': 0.01,
+            'num_epochs': 1000,
+            'lamb': 0
+        },
+        {
+            'k': k_lst[1],
+            'lr': 0.01,
+            'num_epochs': 1000,
+            'lamb': 0
+        },
+        {
+            'k': k_lst[2],
+            'lr': 0.01,
+            'num_epochs': 1000,
+            'lamb': 0
+        },
+        {
+            'k': k_lst[3],
+            'lr': 0.01,
+            'num_epochs': 1000,
+            'lamb': 0
+        },
+        {
+            'k': k_lst[4],
+            'lr': 0.01,
+            'num_epochs': 1000,
+            'lamb': 0
+        }
+    ]
+    for i, config in enumerate(configs):
+        print(f'Configuration: {config}')
+        k = config['k']
+        lr = config['lr']
+        num_epochs = config['num_epochs']
+        lamb = config['lamb']
 
-    train(model, lr, lamb, train_matrix, zero_train_matrix,
-          valid_data, num_epoch)
+        model = AutoEncoder(train_matrix.shape[1], k).to(device=device)
+        train(model, lr, lamb, train_matrix, zero_train_matrix,
+              valid_data, num_epochs)
+        torch.save(model.state_dict(), f"/models/nn_{i+1}")
     #####################################################################
     #                       END OF YOUR CODE                            #
     #####################################################################
