@@ -52,10 +52,10 @@ def main():
     val_data = load_valid_csv("../data")
     test_data = load_public_test_csv("../data")
 
-    print("Sparse matrix:")
-    print(sparse_matrix)
-    print("Shape of sparse matrix:")
-    print(sparse_matrix.shape)
+    # print("Sparse matrix:")
+    # print(sparse_matrix)
+    # print("Shape of sparse matrix:")
+    # print(sparse_matrix.shape)
 
     #####################################################################
     # TODO:                                                             #
@@ -74,12 +74,15 @@ def main():
     k_item = int(np.argmax(item_accuracies))
     test_acc_user = knn_impute_by_user(sparse_matrix, test_data, k_list[k_user])
     test_acc_item = knn_impute_by_item(sparse_matrix, test_data, k_list[k_item])
+    print("\n")
+    print("Summary")
+    print("----------------------")
     print("User based")
-    print("_______________")
+    print("---------------")
     print(f"k selected: {k_list[k_user]}")
     print(f"test acc: {test_acc_user}\n")
     print("Item based")
-    print("_______________")
+    print("---------------")
     print(f"k selected: {k_list[k_item]}")
     print(f"test acc: {test_acc_item}\n")
     #####################################################################

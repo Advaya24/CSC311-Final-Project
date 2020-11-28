@@ -1,6 +1,8 @@
 from utils import *
 
 import numpy as np
+import matplotlib.pyplot as plt
+import scipy
 
 
 def sigmoid(x):
@@ -34,7 +36,7 @@ def neg_log_likelihood(data, theta, beta):
     #         term_3 += np.logaddexp(0, theta[i] - beta[j]) * data[i][j]
     # log_lklihood = term_1 + term_2 - term_3
     log_lklihood = np.sum(np.log(
-        sigmoid(np.tile(theta, (M, 1)) - np.tile(beta, (N, 1)).T)) * data.T)
+        sigmoid(np.tile(theta, (M, 1)).T - np.tile(beta, (N, 1)))) * data)
     #####################################################################
     #                       END OF YOUR CODE                            #
     #####################################################################
@@ -78,7 +80,7 @@ def update_theta_beta(data, lr, theta, beta):
     # for i in range(N):
     #     denom = 1 + np.exp(theta[i] - beta)
     #     theta_cap[i] = np.sum(1 / denom)
-    theta -= (lr * theta_cap)  # TODO: Change to -
+    theta -= (lr * theta_cap)
 
     theta_mat = np.vstack([theta] * M)
     # print(f'data: {data.shape}')
@@ -110,20 +112,29 @@ def irt(data, val_data, lr, iterations):
     :return: (theta, beta, val_acc_lst)
     """
     # TODO: Initialize theta and beta.
-    theta = np.random.randn(data.shape[0])
-    beta = np.random.randn(data.shape[1])
+    # theta = np.random.randn(data.shape[0])
+    # beta = np.random.randn(data.shape[1])
+    # theta = -2 * np.ones(data.shape[0])
+    # beta = 2 * np.ones(data.shape[1])
+    theta = -10 * np.ones(data.shape[0])
+    beta = 10 * np.ones(data.shape[1])
 
     val_acc_lst = []
+    train_llk = []
+    val_llk = []
+    val_matrix = dict_to_sparse(val_data, theta.shape[0], beta.shape[0])
 
     for i in range(iterations):
         neg_lld = neg_log_likelihood(data, theta=theta, beta=beta)
+        train_llk.append(-neg_lld)
+        val_llk.append(-neg_log_likelihood(val_matrix, theta, beta))
         score = evaluate(data=val_data, theta=theta, beta=beta)
         val_acc_lst.append(score)
         print("NLLK: {} \t Score: {}".format(neg_lld, score))
         theta, beta = update_theta_beta(data, lr, theta, beta)
 
     # TODO: You may change the return values to achieve what you want.
-    return theta, beta, val_acc_lst
+    return theta, beta, val_acc_lst, train_llk, val_llk
 
 
 def evaluate(data, theta, beta):
@@ -145,6 +156,34 @@ def evaluate(data, theta, beta):
            / len(data["is_correct"])
 
 
+def plot_training_curve(train_llk, val_llk):
+    plt.plot(train_llk, label="Train")
+    plt.plot(val_llk, label="Validation")
+    plt.xlabel("Num Iterations")
+    plt.ylabel("Log Likelihood")
+    plt.legend()
+    plt.show()
+
+
+def plot_questions(questions, beta):
+    theta = np.tile(np.linspace(-5, 5, 100), (beta.shape[0], 1)).T
+    pc_ij = sigmoid(theta - beta)[:, questions]
+    for i, p in enumerate(pc_ij.T):
+        plt.plot(theta[:, 0], p, label=f"Question {questions[i]}")
+    plt.xlabel("Theta")
+    plt.ylabel("P(c|Theta, Beta)")
+    plt.legend()
+    plt.show()
+
+
+def dict_to_sparse(data_dict, N, d):
+    mat = scipy.sparse.csc_matrix((N, d))
+    for i in range(len(data_dict['user_id'])):
+        mat[data_dict['user_id'][i], data_dict['question_id'][i]] = data_dict[
+            'is_correct'][i]
+    return mat
+
+
 def main():
     train_data = load_train_csv("../data")
     # You may optionally use the sparse matrix.
@@ -157,7 +196,9 @@ def main():
     # Tune learning rate and number of iterations. With the implemented #
     # code, report the validation and test accuracy.                    #
     #####################################################################
-    lr = 0.03
+    lr = 0.01
+    # iterations = 17
+    # iterations = 32
     iterations = 100
     #####################################################################
     #                       END OF YOUR CODE                            #
@@ -167,9 +208,21 @@ def main():
     # TODO:                                                             #
     # Implement part (c)                                                #
     #####################################################################
-    theta, beta, val_acc_list = irt(sparse_matrix, val_data, lr, iterations)
+    theta, beta, val_acc_list, train_llk, val_llk = irt(sparse_matrix, val_data,
+                                                        lr, iterations)
     score = evaluate(test_data, theta=theta, beta=beta)
+    q = beta.shape[0]
+    N = theta.shape[0]
+    print(
+        f'probabilities: {np.mean(sigmoid(np.vstack([theta] * q) - np.vstack([beta] * N).T))}')
+    # print(f'theta: {theta}')
+    # print(f'beta: {beta}')
+    train_score = evaluate(train_data, theta, beta)
+    print(f'Train Score: {train_score}')
     print(f'Test Score: {score}')
+    plot_training_curve(train_llk, val_llk)
+    np.random.seed(0)
+    plot_questions(np.random.choice(sparse_matrix.shape[1], 5), beta)
     #####################################################################
     #                       END OF YOUR CODE                            #
     #####################################################################
