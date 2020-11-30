@@ -1,5 +1,6 @@
 from sklearn.impute import KNNImputer
 from utils import *
+import matplotlib.pyplot as plt
 
 
 def knn_impute_by_user(matrix, valid_data, k):
@@ -51,12 +52,6 @@ def main():
     sparse_matrix = load_train_sparse("../data").toarray()
     val_data = load_valid_csv("../data")
     test_data = load_public_test_csv("../data")
-
-    # print("Sparse matrix:")
-    # print(sparse_matrix)
-    # print("Shape of sparse matrix:")
-    # print(sparse_matrix.shape)
-
     #####################################################################
     # TODO:                                                             #
     # Compute the validation accuracy for each k. Then pick k* with     #
@@ -72,8 +67,23 @@ def main():
         item_accuracies.append(knn_impute_by_item(sparse_matrix, val_data, k))
     k_user = int(np.argmax(user_accuracies))
     k_item = int(np.argmax(item_accuracies))
+    print("Test for k*:")
     test_acc_user = knn_impute_by_user(sparse_matrix, test_data, k_list[k_user])
     test_acc_item = knn_impute_by_item(sparse_matrix, test_data, k_list[k_item])
+    plt.plot(k_list, user_accuracies)
+    plt.xlabel("k")
+    plt.ylabel("Validation Accuracy")
+    plt.title("User-Based Collaborative Filtering")
+    plt.savefig('plots/knn/user.png')
+    plt.show()
+
+    plt.plot(k_list, item_accuracies)
+    plt.xlabel("k")
+    plt.ylabel("Validation Accuracy")
+    plt.title("Item-Based Collaborative Filtering")
+    plt.savefig('plots/knn/item.png')
+    plt.show()
+
     print("\n")
     print("Summary")
     print("----------------------")

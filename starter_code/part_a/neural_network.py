@@ -228,7 +228,7 @@ def main():
         model = AutoEncoder(train_matrix.shape[1], k).to(device=device)
         train(model, lr, lamb, train_matrix, zero_train_matrix,
               valid_data, num_epochs)
-        torch.save(model.state_dict(), f"/models/nn_{i+1}")
+        torch.save(model.state_dict(), f"models/nn_{i+1}")
     #####################################################################
     #                       END OF YOUR CODE                            #
     #####################################################################

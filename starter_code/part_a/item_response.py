@@ -142,6 +142,7 @@ def plot_training_curve(train_llk, val_llk):
     plt.xlabel("Num Iterations")
     plt.ylabel("Log Likelihood")
     plt.legend()
+    plt.savefig('plots/irt/training_curve.png')
     plt.show()
 
 
@@ -153,6 +154,7 @@ def plot_questions(questions, beta):
     plt.xlabel("Theta")
     plt.ylabel("P(c|Theta, Beta)")
     plt.legend()
+    plt.savefig('plots/irt/questions.png')
     plt.show()
 
 
@@ -165,7 +167,7 @@ def dict_to_sparse(data_dict, N, d):
 
 
 def main():
-    train_data = load_train_csv("../data")
+    # train_data = load_train_csv("../data")
     # You may optionally use the sparse matrix.
     sparse_matrix = load_train_sparse("../data")
     val_data = load_valid_csv("../data")
@@ -189,8 +191,6 @@ def main():
     theta, beta, val_acc_list, train_llk, val_llk = irt(sparse_matrix, val_data,
                                                         lr, iterations)
     score = evaluate(test_data, theta=theta, beta=beta)
-    train_score = evaluate(train_data, theta, beta)
-    print(f'Train Score: {train_score}')
     print(f'Test Score: {score}')
     plot_training_curve(train_llk, val_llk)
     np.random.seed(0)
