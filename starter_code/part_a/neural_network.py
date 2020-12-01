@@ -212,31 +212,31 @@ def main():
         {
             'k': k_lst[0],
             'lr': 0.01,
-            'num_epochs': 20,
+            'num_epochs': 80,
             'lamb': 0
         },
         {
-            'k': k_lst[1],
+            'k': k_lst[0],
             'lr': 0.01,
-            'num_epochs': 5,
+            'num_epochs': 80,
             'lamb': 0
         },
         {
-            'k': k_lst[2],
+            'k': k_lst[0],
             'lr': 0.01,
-            'num_epochs': 1000,
+            'num_epochs': 80,
             'lamb': 0
         },
         {
-            'k': k_lst[3],
+            'k': k_lst[0],
             'lr': 0.01,
-            'num_epochs': 1000,
+            'num_epochs': 80,
             'lamb': 0
         },
         {
-            'k': k_lst[4],
+            'k': k_lst[0],
             'lr': 0.01,
-            'num_epochs': 1000,
+            'num_epochs': 80,
             'lamb': 0
         }
     ]
