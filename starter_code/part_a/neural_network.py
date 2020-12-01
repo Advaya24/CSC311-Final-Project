@@ -8,7 +8,8 @@ import torch.utils.data
 
 import numpy as np
 import torch
-# import argparse
+from part_a.item_response import dict_to_sparse
+import matplotlib.pyplot as plt
 
 from starter_code.utils import load_train_sparse, load_valid_csv, \
     load_public_test_csv
@@ -107,8 +108,15 @@ def train(model, lr, lamb, train_data, zero_train_data, valid_data, num_epoch):
     optimizer = optim.SGD(model.parameters(), lr=lr)
     num_student = train_data.shape[0]
 
+    val_sparse = dict_to_sparse(valid_data, num_student, train_data.shape[1])
+    val_sparse = torch.FloatTensor(val_sparse.toarray())
+
+    train_loss_lst = []
+    val_loss_lst = []
+
     for epoch in range(0, num_epoch):
         train_loss = 0.
+        val_loss = 0.
 
         for user_id in range(num_student):
             inputs = Variable(zero_train_data[user_id]).unsqueeze(0).to(device)
@@ -121,16 +129,30 @@ def train(model, lr, lamb, train_data, zero_train_data, valid_data, num_epoch):
             nan_mask = np.isnan(train_data[user_id].unsqueeze(0).numpy())
             target[0][nan_mask] = output[0][nan_mask]
 
+            nan_mask_val = np.isnan(val_sparse[user_id].unsqueeze(0).numpy())
+            val_target = inputs.clone().to(device)
+            val_target[0][nan_mask_val] = output[0][nan_mask_val]
+
+
             loss = torch.sum((output - target) ** 2.) + (
                     (lamb / 2) * model.get_weight_norm())
             loss.backward()
 
             train_loss += loss.item()
             optimizer.step()
+            val_loss_internal = torch.sum((output - val_target) ** 2.) + (
+                    (lamb / 2) * model.get_weight_norm())
+            val_loss += val_loss_internal.item()
 
         valid_acc = evaluate(model, zero_train_data, valid_data)
         print("Epoch: {} \tTraining Cost: {:.6f}\t "
               "Valid Acc: {}".format(epoch, train_loss, valid_acc))
+        train_loss_lst.append(train_loss)
+        val_loss_lst.append(val_loss)
+    plt.plot(train_loss_lst, label="Train")
+    plt.plot(val_loss_lst, label="Validation")
+    plt.legend()
+    plt.savefig("plots/nn/nn.png")
     #####################################################################
     #                       END OF YOUR CODE                            #
     #####################################################################
@@ -190,13 +212,13 @@ def main():
         {
             'k': k_lst[0],
             'lr': 0.01,
-            'num_epochs': 1000,
+            'num_epochs': 20,
             'lamb': 0
         },
         {
             'k': k_lst[1],
             'lr': 0.01,
-            'num_epochs': 1000,
+            'num_epochs': 5,
             'lamb': 0
         },
         {
@@ -218,7 +240,7 @@ def main():
             'lamb': 0
         }
     ]
-    for i, config in enumerate(configs):
+    for i, config in enumerate(configs[:1]):
         print(f'Configuration: {config}')
         k = config['k']
         lr = config['lr']
