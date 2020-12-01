@@ -160,6 +160,7 @@ def plot_questions(questions, beta):
 
 def dict_to_sparse(data_dict, N, d):
     mat = sparse.lil_matrix((N, d))
+    mat[:, :] = np.nan
     for i in range(len(data_dict['user_id'])):
         mat[data_dict['user_id'][i], data_dict['question_id'][i]] = data_dict[
             'is_correct'][i]
@@ -179,7 +180,7 @@ def main():
     # code, report the validation and test accuracy.                    #
     #####################################################################
     lr = 0.01
-    iterations = 20
+    iterations = 15
     #####################################################################
     #                       END OF YOUR CODE                            #
     #####################################################################
