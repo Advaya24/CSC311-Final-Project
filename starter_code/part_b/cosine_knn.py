@@ -2,14 +2,15 @@ from sklearn.impute import KNNImputer
 from utils import *
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.spatial.distance import cosine
 
 
 def pairwise_callable(X, Y, **kwds):
     X_copy = np.nan_to_num(X, nan=0.5)
     Y_copy = np.nan_to_num(Y, nan=0.5)
-    return 1 - ((X_copy @ Y_copy) / (
-            np.linalg.norm(X_copy) * np.linalg.norm(Y_copy)))
-
+    # return 1 - ((X_copy @ Y_copy) / (
+    #         np.linalg.norm(X_copy) * np.linalg.norm(Y_copy)))
+    return cosine(X_copy, Y_copy)
 
 def knn_impute_by_user(matrix, valid_data, k):
     """ Fill in the missing values using k-Nearest Neighbors based on
