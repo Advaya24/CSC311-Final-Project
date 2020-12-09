@@ -2,15 +2,11 @@ from sklearn.impute import KNNImputer
 from utils import *
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy.spatial.distance import cosine
+from scipy.spatial.distance import hamming
 
 
 def pairwise_callable(X, Y, **kwds):
-    X_copy = np.nan_to_num(X, nan=0.5)
-    Y_copy = np.nan_to_num(Y, nan=0.5)
-    # return 1 - ((X_copy @ Y_copy) / (
-    #         np.linalg.norm(X_copy) * np.linalg.norm(Y_copy)))
-    return cosine(X_copy, Y_copy)
+    return hamming(X, Y)
 
 def knn_impute_by_user(matrix, valid_data, k):
     """ Fill in the missing values using k-Nearest Neighbors based on
@@ -46,8 +42,7 @@ def knn_impute_by_user_dist(matrix, valid_data, k):
     :param k: int
     :return: float
     """
-    nbrs = KNNImputer(n_neighbors=k, metric=pairwise_callable,
-                      weights='distance')
+    nbrs = KNNImputer(n_neighbors=k, weights='distance')
     # We use NaN-Euclidean distance measure.
     mat = nbrs.fit_transform(matrix)
     acc = sparse_matrix_evaluate(valid_data, mat)
@@ -108,6 +103,7 @@ def main():
     sparse_matrix = load_train_sparse("../data").toarray()
     val_data = load_valid_csv("../data")
     test_data = load_public_test_csv("../data")
+    private_test = load_private_test_csv("../data")
     #####################################################################
     # TODO:                                                             #
     # Compute the validation accuracy for each k. Then pick k* with     #
@@ -138,33 +134,39 @@ def main():
     test_acc_item = knn_impute_by_item(sparse_matrix, test_data, k_list[k_item])
     test_acc_item_dist = knn_impute_by_item_dist(sparse_matrix, test_data,
                                                  k_list[k_item_dist])
-    plt.plot(k_list, user_accuracies)
-    plt.xlabel("k")
-    plt.ylabel("Validation Accuracy")
-    plt.title("User-Based Collaborative Filtering")
-    plt.savefig('plots/knn/user.png')
-    plt.show()
+    # plt.plot(k_list, user_accuracies)
+    # plt.xlabel("k")
+    # plt.ylabel("Validation Accuracy")
+    # plt.title("User-Based Collaborative Filtering")
+    # plt.savefig('plots/knn/user.png')
+    # # plt.show()
+    # plt.clf()
 
-    plt.plot(k_list, user_accuracies_dist)
-    plt.xlabel("k")
-    plt.ylabel("Validation Accuracy")
-    plt.title("User-Based Weighted Collaborative Filtering")
-    plt.savefig('plots/knn/user_dist.png')
-    plt.show()
 
-    plt.plot(k_list, item_accuracies)
-    plt.xlabel("k")
-    plt.ylabel("Validation Accuracy")
-    plt.title("Item-Based Collaborative Filtering")
-    plt.savefig('plots/knn/item.png')
-    plt.show()
+    # plt.plot(k_list, user_accuracies_dist)
+    # plt.xlabel("k")
+    # plt.ylabel("Validation Accuracy")
+    # plt.title("User-Based Weighted Collaborative Filtering")
+    # plt.savefig('plots/knn/user_dist.png')
+    # # plt.show()
+    # plt.clf()
 
-    plt.plot(k_list, item_accuracies_dist)
-    plt.xlabel("k")
-    plt.ylabel("Validation Accuracy")
-    plt.title("Item-Based Weighted Collaborative Filtering")
-    plt.savefig('plots/knn/item_dist.png')
-    plt.show()
+
+    # plt.plot(k_list, item_accuracies)
+    # plt.xlabel("k")
+    # plt.ylabel("Validation Accuracy")
+    # plt.title("Item-Based Collaborative Filtering")
+    # plt.savefig('plots/knn/item.png')
+    # # plt.show()
+    # plt.clf()
+
+    # plt.plot(k_list, item_accuracies_dist)
+    # plt.xlabel("k")
+    # plt.ylabel("Validation Accuracy")
+    # plt.title("Item-Based Weighted Collaborative Filtering")
+    # plt.savefig('plots/knn/item_dist.png')
+    # # plt.show()
+    # plt.clf()
 
     print("\n")
     print("Summary")
@@ -185,6 +187,10 @@ def main():
     print("---------------")
     print(f"k selected: {k_list[k_item_dist]}")
     print(f"test acc: {test_acc_item_dist}\n")
+    # nbrs = KNNImputer(n_neighbors=21, metric=pairwise_callable)
+    # mat = nbrs.fit_transform(sparse_matrix.T).T
+    # private_test['is_correct'] = sparse_matrix_predictions(private_test, mat)
+    # save_private_test_csv(private_test, 'predictions.csv')
     #####################################################################
     #                       END OF YOUR CODE                            #
     #####################################################################

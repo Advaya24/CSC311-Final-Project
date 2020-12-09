@@ -1,4 +1,4 @@
-from scipy.sparse import load_npz
+from scipy.sparse import load_npz, lil_matrix
 
 import numpy as np
 import csv
@@ -127,14 +127,15 @@ def save_private_test_csv(data, file_name="private_test_result.csv"):
         writer.writerow(["id", "is_correct"])
         for i in range(len(data["user_id"])):
             if str(int(data["is_correct"][i])) not in valid_id:
-                raise Exception("Your data['is_correct'] is not in a valid format.")
+                raise Exception(
+                    "Your data['is_correct'] is not in a valid format.")
             writer.writerow([str(cur_id), str(int(data["is_correct"][i]))])
             cur_id += 1
     return
 
 
 def evaluate(data, predictions, threshold=0.5):
-    """ Return the accuracy of the predictions given the data.
+    """ Return the accuracy of the predictions.csv given the data.
 
     :param data: A dictionary {user_id: list, question_id: list, is_correct: list}
     :param predictions: list
@@ -162,16 +163,18 @@ def sparse_matrix_evaluate(data, matrix, threshold=0.5):
     for i in range(len(data["is_correct"])):
         cur_user_id = data["user_id"][i]
         cur_question_id = data["question_id"][i]
-        if matrix[cur_user_id, cur_question_id] >= threshold and data["is_correct"][i]:
+        if matrix[cur_user_id, cur_question_id] >= threshold and \
+                data["is_correct"][i]:
             total_accurate += 1
-        if matrix[cur_user_id, cur_question_id] < threshold and not data["is_correct"][i]:
+        if matrix[cur_user_id, cur_question_id] < threshold and not \
+                data["is_correct"][i]:
             total_accurate += 1
         total_prediction += 1
     return total_accurate / float(total_prediction)
 
 
 def sparse_matrix_predictions(data, matrix, threshold=0.5):
-    """ Given the sparse matrix represent, return the predictions.
+    """ Given the sparse matrix represent, return the predictions.csv.
 
     This function can be used for submitting Kaggle competition.
 
@@ -189,3 +192,41 @@ def sparse_matrix_predictions(data, matrix, threshold=0.5):
         else:
             predictions.append(0.)
     return predictions
+
+
+def dict_to_sparse(data_dict, N, d):
+    mat = lil_matrix((N, d))
+    mat[:, :] = np.nan
+    # for i in range(len(data_dict['user_id'])):
+    #     mat[data_dict['user_id'][i], data_dict['question_id'][i]] = data_dict[
+    #         'is_correct'][i]
+    mat[data_dict['user_id'], data_dict['question_id']] = data_dict[
+        'is_correct']
+    return mat
+
+
+def dict_to_sparse_weighted(data_dict, N, d):
+    mat = lil_matrix((N, d))
+    weights = np.zeros((N, d))
+    mat[:, :] = np.nan
+    weights[:, :] = 0
+    # for i in range(len(data_dict['user_id'])):
+    #     mat[data_dict['user_id'][i], data_dict['question_id'][i]] = data_dict[
+    #         'is_correct'][i]
+    mat[data_dict['user_id'], data_dict['question_id']] = data_dict[
+        'is_correct']
+    inds = np.vstack([data_dict['user_id'], data_dict['question_id']])
+    idx, count = np.unique(inds, return_counts=True, axis=1)
+    idx1, idx2 = idx
+    weights[idx1, idx2] = count
+    return mat, weights
+
+
+def sample_from_dict(data_dict, idx):
+    data_dict['user_id'] = list(np.array(data_dict['user_id'])[idx])
+    # print(len(data_dict['user_id']))
+    data_dict['question_id'] = list(np.array(data_dict['question_id'])[idx])
+    # print(len(data_dict['question_id']))
+    data_dict['is_correct'] = list(np.array(data_dict['is_correct'])[idx])
+    # print(len(data_dict['is_correct']))
+    return data_dict

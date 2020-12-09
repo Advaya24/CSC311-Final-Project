@@ -14,7 +14,6 @@ import matplotlib.pyplot as plt
 from starter_code.utils import load_train_sparse, load_valid_csv, \
     load_public_test_csv
 
-
 device = torch.device('cpu')
 
 
@@ -133,7 +132,6 @@ def train(model, lr, lamb, train_data, zero_train_data, valid_data, num_epoch):
             val_target = inputs.clone().to(device)
             val_target[0][nan_mask_val] = output[0][nan_mask_val]
 
-
             loss = torch.sum((output - target) ** 2.) + (
                     (lamb / 2) * model.get_weight_norm())
             loss.backward()
@@ -250,7 +248,7 @@ def main():
         model = AutoEncoder(train_matrix.shape[1], k).to(device=device)
         train(model, lr, lamb, train_matrix, zero_train_matrix,
               valid_data, num_epochs)
-        torch.save(model.state_dict(), f"models/nn_{i+1}")
+        torch.save(model.state_dict(), f"models/nn_{i + 1}")
     #####################################################################
     #                       END OF YOUR CODE                            #
     #####################################################################

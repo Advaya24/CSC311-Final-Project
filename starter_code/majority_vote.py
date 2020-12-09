@@ -63,7 +63,7 @@ def main():
         else:
             predictions.append(0.)
     private_test["is_correct"] = predictions
-    # Save your predictions to make it ready to submit to Kaggle.
+    # Save your predictions.csv to make it ready to submit to Kaggle.
     save_private_test_csv(private_test)
     return
 
