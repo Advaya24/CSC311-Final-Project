@@ -120,6 +120,8 @@ def train(model, lr, lamb, train_data, zero_train_data, valid_data, num_epoch):
         for user_id in range(num_student):
             inputs = Variable(zero_train_data[user_id]).unsqueeze(0).to(device)
             target = inputs.clone().to(device)
+            val_inputs = Variable(val_sparse[user_id]).unsqueeze(0).to(device)
+            val_target = val_inputs.clone().to(device)
 
             optimizer.zero_grad()
             output = model(inputs)
@@ -129,18 +131,18 @@ def train(model, lr, lamb, train_data, zero_train_data, valid_data, num_epoch):
             target[0][nan_mask] = output[0][nan_mask]
 
             nan_mask_val = np.isnan(val_sparse[user_id].unsqueeze(0).numpy())
-            val_target = inputs.clone().to(device)
             val_target[0][nan_mask_val] = output[0][nan_mask_val]
 
             loss = torch.sum((output - target) ** 2.) + (
                     (lamb / 2) * model.get_weight_norm())
+
+            val_loss_internal = torch.sum((output - val_target) ** 2.)
+            val_loss += val_loss_internal.item()
+
             loss.backward()
 
             train_loss += loss.item()
             optimizer.step()
-            val_loss_internal = torch.sum((output - val_target) ** 2.) + (
-                    (lamb / 2) * model.get_weight_norm())
-            val_loss += val_loss_internal.item()
 
         valid_acc = evaluate(model, zero_train_data, valid_data)
         print("Epoch: {} \tTraining Cost: {:.6f}\t "
@@ -154,6 +156,7 @@ def train(model, lr, lamb, train_data, zero_train_data, valid_data, num_epoch):
     #####################################################################
     #                       END OF YOUR CODE                            #
     #####################################################################
+
 
 
 def evaluate(model, train_data, valid_data):
@@ -195,60 +198,25 @@ def main():
     #####################################################################
     # Set model hyperparameters.
     k_lst = [10, 50, 100, 200, 500]
-    # for k in k_lst:
-    # parser = argparse.ArgumentParser()
-    # parser.add_argument("--k", required=False,
-    #                     help="Index for k in [10, 50, 100, 200, 500]")
-    # parser.add_argument("--lr", required=False, help="Learning rate")
-    # parser.add_argument("--num-epoch", required=False, help="Num of epochs")
-    # parser.add_argument("--lamb", required=False, help="Lambda regularization")
-    # args = vars(parser.parse_args())
-    # if args['k']:
-    #     k = k_lst[int(args['k'])]
-    # Set optimization hyperparameters.
-    configs = [
-        {
-            'k': k_lst[0],
-            'lr': 0.01,
-            'num_epochs': 80,
-            'lamb': 0
-        },
-        {
-            'k': k_lst[0],
-            'lr': 0.01,
-            'num_epochs': 80,
-            'lamb': 0
-        },
-        {
-            'k': k_lst[0],
-            'lr': 0.01,
-            'num_epochs': 80,
-            'lamb': 0
-        },
-        {
-            'k': k_lst[0],
-            'lr': 0.01,
-            'num_epochs': 80,
-            'lamb': 0
-        },
-        {
-            'k': k_lst[0],
-            'lr': 0.01,
-            'num_epochs': 80,
-            'lamb': 0
-        }
-    ]
-    for i, config in enumerate(configs[:1]):
-        print(f'Configuration: {config}')
-        k = config['k']
-        lr = config['lr']
-        num_epochs = config['num_epochs']
-        lamb = config['lamb']
 
-        model = AutoEncoder(train_matrix.shape[1], k).to(device=device)
-        train(model, lr, lamb, train_matrix, zero_train_matrix,
-              valid_data, num_epochs)
-        torch.save(model.state_dict(), f"models/nn_{i + 1}")
+    # Set optimization hyperparameters.
+    config = {
+        'k': k_lst[0],
+        'lr': 0.01,
+        'num_epochs': 80,
+        'lamb': 0  # 0.001 for regularized version
+    }
+    print(f'Configuration: {config}')
+    k = config['k']
+    lr = config['lr']
+    num_epochs = config['num_epochs']
+    lamb = config['lamb']
+
+    model = AutoEncoder(train_matrix.shape[1], k).to(device=device)
+    train(model, lr, lamb, train_matrix, zero_train_matrix,
+          valid_data, num_epochs)
+    test_acc = evaluate(model, zero_train_matrix, test_data)
+    print(f'Test Accuracy: {test_acc}')
     #####################################################################
     #                       END OF YOUR CODE                            #
     #####################################################################

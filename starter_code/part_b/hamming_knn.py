@@ -8,6 +8,7 @@ from scipy.spatial.distance import hamming
 def pairwise_callable(X, Y, **kwds):
     return hamming(X, Y)
 
+
 def knn_impute_by_user(matrix, valid_data, k):
     """ Fill in the missing values using k-Nearest Neighbors based on
     student similarity. Return the accuracy on valid_data.
@@ -142,7 +143,6 @@ def main():
     # # plt.show()
     # plt.clf()
 
-
     # plt.plot(k_list, user_accuracies_dist)
     # plt.xlabel("k")
     # plt.ylabel("Validation Accuracy")
@@ -150,7 +150,6 @@ def main():
     # plt.savefig('plots/knn/user_dist.png')
     # # plt.show()
     # plt.clf()
-
 
     # plt.plot(k_list, item_accuracies)
     # plt.xlabel("k")

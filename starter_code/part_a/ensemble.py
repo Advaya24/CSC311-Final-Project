@@ -78,9 +78,9 @@ def main():
     predictions = (irt1_predictions + irt2_predictions + irt3_predictions) / 3
     val_acc = sparse_matrix_evaluate(val_data, predictions)
     test_acc = sparse_matrix_evaluate(test_data, predictions)
-    private_test['is_correct'] = sparse_matrix_predictions(private_test,
-                                                           predictions)
-    save_private_test_csv(private_test, 'predictions.csv')
+    # private_test['is_correct'] = sparse_matrix_predictions(private_test,
+    #                                                        predictions)
+    # save_private_test_csv(private_test, 'predictions.csv')
     print("\nFinal Accuracies: ")
     print("------------------------------")
     print(f'Val accuracy: {val_acc}')
