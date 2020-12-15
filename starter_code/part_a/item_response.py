@@ -267,7 +267,7 @@ def main():
     score = evaluate(test_data, theta=theta, beta=beta)
     print(f'Test Score: {score}')
     plot_training_curve(train_llk, val_llk)
-    plot_questions([559, 684, 835, 1216, 1653], sorted(theta), beta)
+    plot_questions([559, 684, 835, 1216, 1653], np.linspace(-5, 5, 100), beta)
 
     # For private test:
     # private_test = load_private_test_csv('../data')
