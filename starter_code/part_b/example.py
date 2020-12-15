@@ -10,10 +10,10 @@ def pairwise_callable(X, Y, **kwds):
 if __name__ == '__main__':
     train_data = np.array(
         [[1, 1, 1], [1, np.nan, 1], [np.nan, 1, 0], [1, np.nan, 1],
-         [1, np.nan, 1]])
+         [1, np.nan, 0]])
     full_data = np.array(
         [[1, 1, 1], [1, 1, 1], [0, 1, 0], [1, 1, 1],
-         [1, 1, 1]])
+         [1, 1, 0]])
 
     nbrs_euclidean = KNNImputer(n_neighbors=1)
     nbrs_hamming = KNNImputer(n_neighbors=1, metric=pairwise_callable)
@@ -23,5 +23,7 @@ if __name__ == '__main__':
 
     print(f'train: \n{train_data}')
     print(f'nan_euclidean: \n{mat_euclidean}')
+    print(f'accuracy: {np.mean(mat_euclidean == full_data)}')
     print(f'hamming: \n{mat_hamming}')
+    print(f'accuracy: {np.mean(mat_hamming == full_data)}')
     print(f'actual: \n{full_data}')
