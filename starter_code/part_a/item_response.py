@@ -129,19 +129,22 @@ def plot_training_curve(train_llk, val_llk):
     plt.xlabel("Num Iterations")
     plt.ylabel("Log Likelihood")
     plt.legend()
+    plt.title("Training curve")
     plt.gcf().set_size_inches([10, 7])
     plt.savefig('plots/irt/training_curve.png')
     plt.show()
 
 
-def plot_questions(questions, beta):
-    theta = np.tile(np.linspace(-5, 5, 100), (beta.shape[0], 1)).T
+def plot_questions(questions, theta, beta):
+    theta = np.tile(theta, (beta.shape[0], 1)).T
     pc_ij = sigmoid(theta - beta)[:, questions]
     for i, p in enumerate(pc_ij.T):
+        # plt.scatter(theta[:, 0], p, label=f"Question {questions[i]}")
         plt.plot(theta[:, 0], p, label=f"Question {questions[i]}")
     plt.xlabel("Theta")
-    plt.ylabel("P(c|Theta, Beta)")
+    plt.ylabel("P(c = 1|Theta, Beta)")
     plt.legend()
+    plt.title('Probability of correct response')
     plt.savefig('plots/irt/questions.png')
     plt.show()
 
@@ -240,37 +243,25 @@ def irt_weighted(data, weights, val_data, lr, iterations):
 
 
 def main():
-    train_data = load_train_csv("../data")
+    # train_data = load_train_csv("../data")
     # You may optionally use the sparse matrix.
-    # sparse_matrix = load_train_sparse("../data")
+    sparse_matrix = load_train_sparse("../data")
     val_data = load_valid_csv("../data")
     test_data = load_public_test_csv("../data")
-    private_test = load_private_test_csv("../data")
 
-    #####################################################################
-    # TODO:                                                             #
-    # Tune learning rate and number of iterations. With the implemented #
-    # code, report the validation and test accuracy.                    #
-    #####################################################################
     lr = 0.01
     iterations = 14
-    #####################################################################
-    #                       END OF YOUR CODE                            #
-    #####################################################################
 
-    #####################################################################
-    # TODO:                                                             #
-    # Implement part (c)                                                #
-    #####################################################################
-    N = len(set(train_data['user_id']))
-    d = len(set(train_data['question_id']))
-    sparse_matrix, weights = dict_to_sparse_weighted(train_data, N, d)
-    # For weighted IRT
+    # For weighted IRT:
+    # N = len(set(train_data['user_id']))
+    # d = len(set(train_data['question_id']))
+    # sparse_matrix, weights = dict_to_sparse_weighted(train_data, N, d)
     # theta, beta, val_acc_list, train_llk, val_llk = \
     #                                                irt_weighted(sparse_matrix,
     #                                                              weights,
     #                                                              val_data, lr,
     #                                                              iterations)
+
     theta, beta, val_acc_list, train_llk, val_llk = irt(sparse_matrix,
                                                         val_data, lr,
                                                         iterations)
@@ -278,13 +269,13 @@ def main():
     print(f'Test Score: {score}')
     plot_training_curve(train_llk, val_llk)
     np.random.seed(0)
-    plot_questions(np.random.choice(sparse_matrix.shape[1], 5), beta)
+    plot_questions([559, 684, 835, 1216, 1653], sorted(theta), beta)
+
+    # For private test:
+    # private_test = load_private_test_csv('../data')
     # preds = predict(private_test, theta, beta)
     # private_test['is_correct'] = preds
     # save_private_test_csv(private_test, 'predictions.csv')
-    #####################################################################
-    #                       END OF YOUR CODE                            #
-    #####################################################################
 
 
 if __name__ == "__main__":

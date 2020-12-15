@@ -7,7 +7,7 @@ from utils import *
 
 def irt_ensemble(train_data, train_weights, val_data):
     lr = 0.01
-    iterations = 15
+    iterations = 14
     theta, beta, val_acc_list, train_llk, val_llk = irt_weighted(train_data,
                                                                  train_weights,
                                                                  val_data,
@@ -36,10 +36,10 @@ def main():
     # create sample data
     train_full = load_train_csv('../data')
     test_data = load_public_test_csv('../data')
-    private_test = load_private_test_csv('../data')
     n = len(train_full['user_id'])
     N = len(set(train_full['user_id']))
     d = len(set(train_full['question_id']))
+    # Sampling with replacement
     irt1_idx = np.random.choice(n, n)
     irt2_idx = np.random.choice(n, n)
     irt3_idx = np.random.choice(n, n)
@@ -57,6 +57,7 @@ def main():
     # item = item_sample.toarray()
     # item[item == 0] = -1
     # item *= item_weights
+    # Running the models
     print('First dataset: ')
     irt1_predictions = irt_ensemble(irt1_sample, irt1_weights, val_data)
     print('\nSecond dataset: ')
@@ -67,7 +68,6 @@ def main():
     # item_out = np.nan_to_num(knn_item(item), nan=0)
     # user_predictions = 0.5 + (user_out / 2)
     # item_predictions = 0.5 + (item_out / 2)
-
     # if user_predictions.shape != irt_predictions.shape:
     #     missing_col = list(
     #         set(range(d)).difference(set(user_dict['question_id'])))
@@ -75,6 +75,7 @@ def main():
     #     user_inter = np.ones((N, d)) * 0.5
     #     for i in range(1, len(missing_col)-1):
 
+    # Predictions and accuracy
     predictions = (irt1_predictions + irt2_predictions + irt3_predictions) / 3
     val_acc = sparse_matrix_evaluate(val_data, predictions)
     test_acc = sparse_matrix_evaluate(test_data, predictions)

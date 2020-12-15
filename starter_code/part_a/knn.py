@@ -24,6 +24,7 @@ def knn_impute_by_user(matrix, valid_data, k):
     return acc
 
 
+
 def knn_impute_by_item(matrix, valid_data, k):
     """ Fill in the missing values using k-Nearest Neighbors based on
     question similarity. Return the accuracy on valid_data.

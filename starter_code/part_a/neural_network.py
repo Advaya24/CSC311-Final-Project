@@ -14,8 +14,6 @@ import matplotlib.pyplot as plt
 from starter_code.utils import load_train_sparse, load_valid_csv, \
     load_public_test_csv
 
-device = torch.device('cpu')
-
 
 def load_data(base_path="../data"):
     """ Load the data in PyTorch Tensor.
@@ -72,16 +70,8 @@ class AutoEncoder(nn.Module):
         :param inputs: user vector.
         :return: user vector.
         """
-        #####################################################################
-        # TODO:                                                             #
-        # Implement the function as described in the docstring.             #
-        # Use sigmoid activations for f and g.                              #
-        #####################################################################
         out_1 = torch.sigmoid(self.g(inputs))
         out = torch.sigmoid(self.h(out_1))
-        #####################################################################
-        #                       END OF YOUR CODE                            #
-        #####################################################################
         return out
 
 
@@ -98,8 +88,6 @@ def train(model, lr, lamb, train_data, zero_train_data, valid_data, num_epoch):
     :param num_epoch: int
     :return: None
     """
-    # TODO: Add a regularizer to the cost function.
-    global device
     # Tell PyTorch you are training the model.
     model.train()
 
@@ -118,10 +106,8 @@ def train(model, lr, lamb, train_data, zero_train_data, valid_data, num_epoch):
         val_loss = 0.
 
         for user_id in range(num_student):
-            inputs = Variable(zero_train_data[user_id]).unsqueeze(0).to(device)
-            target = inputs.clone().to(device)
-            val_inputs = Variable(val_sparse[user_id]).unsqueeze(0).to(device)
-            val_target = val_inputs.clone().to(device)
+            inputs = Variable(zero_train_data[user_id]).unsqueeze(0)
+            target = inputs.clone()
 
             optimizer.zero_grad()
             output = model(inputs)
@@ -130,19 +116,22 @@ def train(model, lr, lamb, train_data, zero_train_data, valid_data, num_epoch):
             nan_mask = np.isnan(train_data[user_id].unsqueeze(0).numpy())
             target[0][nan_mask] = output[0][nan_mask]
 
-            nan_mask_val = np.isnan(val_sparse[user_id].unsqueeze(0).numpy())
-            val_target[0][nan_mask_val] = output[0][nan_mask_val]
 
             loss = torch.sum((output - target) ** 2.) + (
                     (lamb / 2) * model.get_weight_norm())
 
-            val_loss_internal = torch.sum((output - val_target) ** 2.)
-            val_loss += val_loss_internal.item()
 
             loss.backward()
 
             train_loss += loss.item()
             optimizer.step()
+
+            val_inputs = Variable(val_sparse[user_id]).unsqueeze(0)
+            val_target = val_inputs.clone()
+            nan_mask_val = np.isnan(val_sparse[user_id].unsqueeze(0).numpy())
+            val_target[0][nan_mask_val] = output[0][nan_mask_val]
+            val_loss_internal = torch.sum((output - val_target) ** 2.)
+            val_loss += val_loss_internal.item()
 
         valid_acc = evaluate(model, zero_train_data, valid_data)
         print("Epoch: {} \tTraining Cost: {:.6f}\t "
@@ -153,10 +142,6 @@ def train(model, lr, lamb, train_data, zero_train_data, valid_data, num_epoch):
     plt.plot(val_loss_lst, label="Validation")
     plt.legend()
     plt.savefig("plots/nn/nn.png")
-    #####################################################################
-    #                       END OF YOUR CODE                            #
-    #####################################################################
-
 
 
 def evaluate(model, train_data, valid_data):
@@ -186,16 +171,8 @@ def evaluate(model, train_data, valid_data):
 
 
 def main():
-    global device
     zero_train_matrix, train_matrix, valid_data, test_data = load_data()
-    if torch.cuda.is_available():
-        device = torch.device('cuda')
 
-    #####################################################################
-    # TODO:                                                             #
-    # Try out 5 different k and select the best k using the             #
-    # validation set.                                                   #
-    #####################################################################
     # Set model hyperparameters.
     k_lst = [10, 50, 100, 200, 500]
 
@@ -204,7 +181,7 @@ def main():
         'k': k_lst[0],
         'lr': 0.01,
         'num_epochs': 80,
-        'lamb': 0  # 0.001 for regularized version
+        'lamb': 0.001  # 0.001 for regularized version
     }
     print(f'Configuration: {config}')
     k = config['k']
@@ -212,14 +189,11 @@ def main():
     num_epochs = config['num_epochs']
     lamb = config['lamb']
 
-    model = AutoEncoder(train_matrix.shape[1], k).to(device=device)
-    train(model, lr, lamb, train_matrix, zero_train_matrix,
-          valid_data, num_epochs)
+    model = AutoEncoder(train_matrix.shape[1], k)
+    train(model, lr, lamb, train_matrix, zero_train_matrix, valid_data,
+          num_epochs)
     test_acc = evaluate(model, zero_train_matrix, test_data)
     print(f'Test Accuracy: {test_acc}')
-    #####################################################################
-    #                       END OF YOUR CODE                            #
-    #####################################################################
 
 
 if __name__ == "__main__":

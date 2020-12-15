@@ -210,9 +210,6 @@ def dict_to_sparse_weighted(data_dict, N, d):
     weights = np.zeros((N, d))
     mat[:, :] = np.nan
     weights[:, :] = 0
-    # for i in range(len(data_dict['user_id'])):
-    #     mat[data_dict['user_id'][i], data_dict['question_id'][i]] = data_dict[
-    #         'is_correct'][i]
     mat[data_dict['user_id'], data_dict['question_id']] = data_dict[
         'is_correct']
     inds = np.vstack([data_dict['user_id'], data_dict['question_id']])
