@@ -9,7 +9,7 @@ def pairwise_callable(X, Y, **kwds):
 
 if __name__ == '__main__':
     train_data = np.array(
-        [[1, 1, 1], [1, np.nan, 1], [np.nan, 1, 0], [1, np.nan, 1],
+        [[1, np.nan, 1], [1, np.nan, 1], [np.nan, 1, 0], [1, np.nan, 1],
          [1, np.nan, 0]])
     full_data = np.array(
         [[1, 1, 1], [1, 1, 1], [0, 1, 0], [1, 1, 1],
