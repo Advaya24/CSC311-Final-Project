@@ -1,7 +1,6 @@
 # TODO: complete this file.
 from part_a.item_response import *
 from sklearn.impute import KNNImputer
-from part_a.neural_network import *
 from utils import *
 
 
@@ -39,6 +38,7 @@ def main():
     n = len(train_full['user_id'])
     N = len(set(train_full['user_id']))
     d = len(set(train_full['question_id']))
+
     # Sampling with replacement
     irt1_idx = np.random.choice(n, n)
     irt2_idx = np.random.choice(n, n)
@@ -51,12 +51,6 @@ def main():
     irt3_sample, irt3_weights = dict_to_sparse_weighted(irt3_dict, N, d)
     val_data = load_valid_csv("../data")
 
-    # user = user_sample.toarray()
-    # user[user == 0] = -1
-    # user *= user_weights
-    # item = item_sample.toarray()
-    # item[item == 0] = -1
-    # item *= item_weights
     # Running the models
     print('First dataset: ')
     irt1_predictions = irt_ensemble(irt1_sample, irt1_weights, val_data)
@@ -64,24 +58,11 @@ def main():
     irt2_predictions = irt_ensemble(irt2_sample, irt2_weights, val_data)
     print('\nThird dataset: ')
     irt3_predictions = irt_ensemble(irt3_sample, irt3_weights, val_data)
-    # user_out = np.nan_to_num(knn_user(user), nan=0)
-    # item_out = np.nan_to_num(knn_item(item), nan=0)
-    # user_predictions = 0.5 + (user_out / 2)
-    # item_predictions = 0.5 + (item_out / 2)
-    # if user_predictions.shape != irt_predictions.shape:
-    #     missing_col = list(
-    #         set(range(d)).difference(set(user_dict['question_id'])))
-    #     missing_col.append(d)
-    #     user_inter = np.ones((N, d)) * 0.5
-    #     for i in range(1, len(missing_col)-1):
 
     # Predictions and accuracy
     predictions = (irt1_predictions + irt2_predictions + irt3_predictions) / 3
     val_acc = sparse_matrix_evaluate(val_data, predictions)
     test_acc = sparse_matrix_evaluate(test_data, predictions)
-    # private_test['is_correct'] = sparse_matrix_predictions(private_test,
-    #                                                        predictions)
-    # save_private_test_csv(private_test, 'predictions.csv')
     print("\nFinal Accuracies: ")
     print("------------------------------")
     print(f'Val accuracy: {val_acc}')

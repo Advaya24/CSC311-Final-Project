@@ -2,7 +2,6 @@ from utils import *
 
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy import sparse
 
 
 def sigmoid(x):
@@ -268,7 +267,6 @@ def main():
     score = evaluate(test_data, theta=theta, beta=beta)
     print(f'Test Score: {score}')
     plot_training_curve(train_llk, val_llk)
-    np.random.seed(0)
     plot_questions([559, 684, 835, 1216, 1653], sorted(theta), beta)
 
     # For private test:

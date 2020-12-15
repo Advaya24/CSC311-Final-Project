@@ -24,7 +24,6 @@ def knn_impute_by_user(matrix, valid_data, k):
     return acc
 
 
-
 def knn_impute_by_item(matrix, valid_data, k):
     """ Fill in the missing values using k-Nearest Neighbors based on
     question similarity. Return the accuracy on valid_data.
@@ -35,17 +34,10 @@ def knn_impute_by_item(matrix, valid_data, k):
     :param k: int
     :return: float
     """
-    #####################################################################
-    # TODO:                                                             #
-    # Implement the function as described in the docstring.             #
-    #####################################################################
     nbrs = KNNImputer(n_neighbors=k)
     mat = nbrs.fit_transform(matrix.T).T
     acc = sparse_matrix_evaluate(valid_data, mat)
     print("Item Based Validation Accuracy: {}".format(acc))
-    #####################################################################
-    #                       END OF YOUR CODE                            #
-    #####################################################################
     return acc
 
 
@@ -53,12 +45,6 @@ def main():
     sparse_matrix = load_train_sparse("../data").toarray()
     val_data = load_valid_csv("../data")
     test_data = load_public_test_csv("../data")
-    #####################################################################
-    # TODO:                                                             #
-    # Compute the validation accuracy for each k. Then pick k* with     #
-    # the best performance and report the test accuracy with the        #
-    # chosen k*.                                                        #
-    #####################################################################
     k_list = [1, 6, 11, 16, 21, 26]
     user_accuracies = []
     item_accuracies = []
@@ -96,10 +82,6 @@ def main():
     print("---------------")
     print(f"k selected: {k_list[k_item]}")
     print(f"test acc: {test_acc_item}\n")
-    #####################################################################
-    #                       END OF YOUR CODE                            #
-    #####################################################################
-
 
 if __name__ == "__main__":
     main()

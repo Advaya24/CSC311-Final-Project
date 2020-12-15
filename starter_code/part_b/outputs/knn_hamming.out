@@ -1,0 +1,36 @@
+k = 1:
+Item Based Validation Accuracy: 0.6555179226644087
+Item Based Weighted Validation Accuracy: 0.6555179226644087
+k = 6:
+Item Based Validation Accuracy: 0.6915043748235958
+Item Based Weighted Validation Accuracy: 0.6955969517358171
+k = 11:
+Item Based Validation Accuracy: 0.7023708721422524
+Item Based Weighted Validation Accuracy: 0.7023708721422524
+k = 16:
+Item Based Validation Accuracy: 0.6978549252046289
+Item Based Weighted Validation Accuracy: 0.7034998588766582
+k = 21:
+Item Based Validation Accuracy: 0.7050522156364663
+Item Based Weighted Validation Accuracy: 0.7049110922946655
+k = 26:
+Item Based Validation Accuracy: 0.7027942421676545
+Item Based Weighted Validation Accuracy: 0.7044877222692634
+
+Test for k*:
+Item Based Validation Accuracy: 0.6951735817104149
+Item Based Weighted Validation Accuracy: 0.6948913350268134
+
+
+Summary
+----------------------
+Item based
+---------------
+k selected: 21
+test acc: 0.6951735817104149
+
+Item based weighted
+---------------
+k selected: 21
+test acc: 0.6948913350268134
+
