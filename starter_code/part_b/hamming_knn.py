@@ -73,9 +73,6 @@ def main():
     print("---------------")
     print(f"k selected: {k_list[k_item_weighted]}")
     print(f"test acc: {test_acc_item_weighted}\n")
-    #####################################################################
-    #                       END OF YOUR CODE                            #
-    #####################################################################
 
 
 if __name__ == "__main__":
